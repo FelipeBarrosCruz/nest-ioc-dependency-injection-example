@@ -2,7 +2,6 @@ import { ResponseDTO } from '../dtos/response.dto';
 import { IStrategy, BaseStrategy } from './base.strategy';
 import { Injectable } from '@nestjs/common';
 import { BService } from '../services/b.service';
-import { BaseService } from '../services/base.service';
 
 @Injectable()
 export class StrategyB extends BaseStrategy implements IStrategy {

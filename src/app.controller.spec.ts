@@ -1,6 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { OperationTypeEnum } from './enums/operation-type.enum';
 import { BaseService } from './services/base.service';
 import { AService } from './services/a.service';
@@ -10,6 +8,7 @@ import { StrategyA } from './strategies/a.strategy';
 import { StrategyB } from './strategies/b.strategy';
 import { StrategyC } from './strategies/c.strategy';
 import { ResponseDTO } from './dtos/response.dto';
+import { AppTestModule } from './app.module';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -22,19 +21,7 @@ describe('AppController', () => {
   let strategyC: StrategyC;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [
-        AppService,
-        BaseService,
-        AService,
-        BService,
-        CService,
-        StrategyA,
-        StrategyB,
-        StrategyC,
-      ],
-    }).compile();
+    const app = await AppTestModule.get().compile();
 
     appController = app.get<AppController>(AppController);
     baseService = app.get<BaseService>(BaseService);

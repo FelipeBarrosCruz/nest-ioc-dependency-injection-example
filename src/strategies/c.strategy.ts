@@ -3,7 +3,6 @@ import { IStrategy, BaseStrategy } from './base.strategy';
 import { Injectable } from '@nestjs/common';
 import { BService } from '../services/b.service';
 import { CService } from '../services/c.service';
-import { BaseService } from '../services/base.service';
 
 @Injectable()
 export class StrategyC extends BaseStrategy implements IStrategy {
