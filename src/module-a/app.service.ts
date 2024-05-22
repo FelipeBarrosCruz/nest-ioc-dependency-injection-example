@@ -4,6 +4,7 @@ import { OperationTypeEnum } from './enums/operation-type.enum';
 import { StrategyA } from './strategies/a.strategy';
 import { StrategyB } from './strategies/b.strategy';
 import { StrategyC } from './strategies/c.strategy';
+import { StrategyD } from './strategies/d.strategy';
 
 @Injectable()
 export class AppService {
@@ -11,6 +12,7 @@ export class AppService {
     private readonly strategyA: StrategyA,
     private readonly strategyB: StrategyB,
     private readonly strategyC: StrategyC,
+    private readonly strategyD: StrategyD,
   ) {}
 
   getStrategy(operationType: OperationTypeEnum): IStrategy {
@@ -21,6 +23,8 @@ export class AppService {
         return this.strategyB;
       case OperationTypeEnum.C:
         return this.strategyC;
+      case OperationTypeEnum.D:
+        return this.strategyD;
       default:
         throw new NotImplementedException('Invalid operation type');
     }

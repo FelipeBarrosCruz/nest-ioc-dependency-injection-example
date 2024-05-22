@@ -1,2 +1,2 @@
 export * from './types';
-export * from './module-factory';
+export * from './nest-module-factory';

@@ -5,9 +5,8 @@ import {
   Provider,
   Type,
 } from '@nestjs/common';
-import { TestingModuleBuilder } from '@nestjs/testing';
+import { TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import { DeepMocked, MockOptions, PartialFuncReturn } from '@golevelup/ts-jest';
-
 
 export type ImportsType = Array<
   Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
@@ -49,9 +48,11 @@ export type CreateTestModuleArgs = {
 };
 
 export interface ITestModule {
-  setupCreateMockFn(createMockFn: CreateMockType): Promise<ITestModule>;
-  setupProviders(args?: OverrideProvidersArgs): Promise<ITestModule>;
-  get(): TestingModuleBuilder;
+  setupCreateMockFn(createMockFn: CreateMockType): ITestModule;
+  setupProviders(args?: OverrideProvidersArgs): ITestModule;
+  setupImports(): ITestModule;
+  getModuleRef(): TestingModuleBuilder;
+  compile(): Promise<TestingModule>;
 }
 
 export interface INestModuleFactory {

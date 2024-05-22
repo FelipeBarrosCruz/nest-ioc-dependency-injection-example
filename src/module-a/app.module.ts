@@ -6,10 +6,13 @@ import { BService } from './services/b.service';
 import { CService } from './services/c.service';
 import { StrategyB } from './strategies/b.strategy';
 import { StrategyC } from './strategies/c.strategy';
+import { StrategyD } from './strategies/d.strategy';
 import { BaseService } from './services/base.service';
-import { NestModuleFactory } from './libs/nest-module-factory';
+import { AppModuleB } from '../module-b/app.module';
+import { NestModuleFactory } from '../libs/nest-module-factory';
 
 export const ModuleFactory = new NestModuleFactory({
+  imports: [AppModuleB],
   controllers: [AppController],
   providers: [
     BaseService,
@@ -20,11 +23,12 @@ export const ModuleFactory = new NestModuleFactory({
     StrategyA,
     StrategyB,
     StrategyC,
+    StrategyD,
   ],
 });
 
 export const AppModule = ModuleFactory.createModule({
-  classType: class AppModule {},
+  classType: class AppModuleA {},
   global: true,
 });
 
