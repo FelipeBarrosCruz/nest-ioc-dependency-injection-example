@@ -8,11 +8,17 @@ import {
 import { TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import { DeepMocked, MockOptions, PartialFuncReturn } from '@golevelup/ts-jest';
 
-export type ImportsType = Array<
-  Type<any> | DynamicModule | Promise<DynamicModule> | ForwardReference
->;
+export type ImportType =
+  | Type<any>
+  | DynamicModule
+  | Promise<DynamicModule>
+  | ForwardReference;
 
-export type ControllersType = Type<any>[];
+export type ImportsType = Array<ImportType>;
+
+export type ControllerType = Type<any>;
+
+export type ControllersType = ControllerType[];
 
 export type ProvidersType = Provider[];
 
@@ -48,10 +54,13 @@ export type CreateTestModuleArgs = {
 };
 
 export interface ITestModule {
+  addImport(imported: ImportType): ITestModule;
+  addProvider(provider: Provider): ITestModule;
+  addController(controller: ControllerType): ITestModule;
+  getModuleRef(): TestingModuleBuilder;
   setupCreateMockFn(createMockFn: CreateMockType): ITestModule;
   setupProviders(args?: OverrideProvidersArgs): ITestModule;
   setupImports(): ITestModule;
-  getModuleRef(): TestingModuleBuilder;
   compile(): Promise<TestingModule>;
 }
 

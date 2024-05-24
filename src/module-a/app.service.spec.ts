@@ -7,6 +7,17 @@ import { ResponseDTO } from './dtos/response.dto';
 import { AppTestModule } from './app.module';
 import { createMock } from '@golevelup/ts-jest';
 import { BaseService } from './services/base.service';
+import { Controller, Injectable } from '@nestjs/common';
+
+@Injectable()
+class FakeProvider {
+  public getName(): string {
+    return 'fake';
+  }
+}
+
+@Controller('app')
+class FakeController {}
 
 describe('AppService', () => {
   let appService: AppService;
@@ -14,7 +25,13 @@ describe('AppService', () => {
   let strategyA: StrategyA;
   let strategyD: StrategyD;
   let baseService: BaseService;
-  const providersExclusions = [AppService, BaseService, StrategyD];
+  let fakeProvider: FakeProvider;
+  const providersExclusions = [
+    AppService,
+    BaseService,
+    StrategyD,
+    FakeProvider,
+  ];
 
   beforeEach(async () => {
     // const app = await AppTestModule.setupProviders()
@@ -29,15 +46,19 @@ describe('AppService', () => {
     //   .setupCreateMockFn(createMock)
     //   .compile();
 
-    const app = await AppTestModule.setupProviders({
-      exclude: providersExclusions,
-    }).compile();
+    const app = await AppTestModule.addController(FakeController)
+      .addProvider(FakeProvider)
+      .setupProviders({
+        exclude: providersExclusions,
+      })
+      .compile();
 
     appService = app.get<AppService>(AppService);
     dService = app.get<DService>(DService);
     strategyA = app.get<StrategyA>(StrategyA);
     strategyD = app.get<StrategyD>(StrategyD);
     baseService = app.get<BaseService>(BaseService);
+    fakeProvider = app.get<FakeProvider>(FakeProvider);
   });
 
   afterEach(async () => {
@@ -153,6 +174,16 @@ describe('AppService', () => {
       expect(baseService.formatContext).toHaveBeenCalled();
       expect(dService.getName).toHaveBeenCalled();
       expect(result).toEqual(expected);
+    });
+
+    it('test fake provider is mocked', () => {
+      const expected = 'fake';
+
+      jest.spyOn(fakeProvider, 'getName');
+
+      const result = fakeProvider.getName();
+      expect(fakeProvider.getName).toHaveBeenCalled();
+      expect(result).toBe(expected);
     });
   });
 });

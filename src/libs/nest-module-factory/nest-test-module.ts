@@ -1,7 +1,12 @@
 import { DynamicModule, ModuleMetadata, Provider } from '@nestjs/common';
-import { CreateMockType, ITestModule, OverrideProvidersArgs } from './types';
+import {
+  ControllerType,
+  CreateMockType,
+  ITestModule,
+  ImportType,
+  OverrideProvidersArgs,
+} from './types';
 import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing';
-import { Reflector } from '@nestjs/core';
 import * as _ from 'lodash';
 
 export class TestModule implements ITestModule {
@@ -16,8 +21,12 @@ export class TestModule implements ITestModule {
 
   public constructor(metadata: ModuleMetadata, createMockFn?: CreateMockType) {
     this.metadata = metadata;
-    this.moduleRef = Test.createTestingModule(this.metadata);
     this.createMockFn = createMockFn;
+    this.createModuleRef();
+  }
+
+  private createModuleRef() {
+    this.moduleRef = Test.createTestingModule(this.metadata);
   }
 
   private async loadDefaultCreateMockFn(): Promise<CreateMockType> {
@@ -26,7 +35,8 @@ export class TestModule implements ITestModule {
   }
 
   private async getCreateMockFn(): Promise<CreateMockType> {
-    return this.createMockFn ?? (await this.loadDefaultCreateMockFn());
+    const defaultCreateMockFn = await this.loadDefaultCreateMockFn();
+    return this.createMockFn ?? defaultCreateMockFn;
   }
 
   private getProvidersToOverride(): Provider[] {
@@ -53,24 +63,37 @@ export class TestModule implements ITestModule {
   }
 
   private async overrideImports() {
-    const imports = this.metadata.imports;
+    const exportedModuleProviders: Provider[] =
+      this.metadata.imports?.reduce(
+        (acc: Provider[], module: DynamicModule) => {
+          return acc.concat(module.exports as Provider[]);
+        },
+        [] as Provider[],
+      ) ?? [];
 
-    const modulesProviders: Provider[][] = imports.map(
-      (module: DynamicModule) => {
-        return module.exports as Provider[];
-      },
-    );
-
-    const providers: Provider[] = _.flatten<Provider[]>(modulesProviders);
-
-    this.metadata.providers = this.metadata.providers.concat(providers);
-    this.moduleRef = Test.createTestingModule(this.metadata);
+    for (const exportedModuleProvider of exportedModuleProviders) {
+      this.addProvider(exportedModuleProvider);
+    }
 
     this.metadata.imports = undefined;
-
     this.moduleRef = Test.createTestingModule(this.metadata);
 
-    await this.applyOverrideProviders(providers);
+    await this.applyOverrideProviders(exportedModuleProviders);
+  }
+
+  addProvider(provider: Provider): ITestModule {
+    this.metadata.providers.push(provider);
+    return this;
+  }
+
+  addController(controller: ControllerType): ITestModule {
+    this.metadata.controllers.push(controller);
+    return this;
+  }
+
+  addImport(importedModule: ImportType): ITestModule {
+    this.metadata.imports.push(importedModule);
+    return this;
   }
 
   setupCreateMockFn(createMockFn: CreateMockType): ITestModule {
@@ -90,6 +113,7 @@ export class TestModule implements ITestModule {
   }
 
   getModuleRef(): TestingModuleBuilder {
+    this.moduleRef = Test.createTestingModule(this.metadata);
     return this.moduleRef;
   }
 
